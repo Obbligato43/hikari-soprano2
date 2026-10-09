@@ -1,0 +1,413 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ヒカリ｜ソプラノ練習アドバイザー</title>
+
+  <style>
+    :root {
+      --pink: #f6a9c5;
+      --blue: #a9dafa;
+      --yellow: #ffe69a;
+      --white: #ffffff;
+      --ink: #41465a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px 14px;
+      font-family: "Yu Gothic", "Meiryo", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(135deg, #fff4f8, #eff9ff);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 26px 16px;
+      background: var(--white);
+      border: 3px solid var(--pink);
+      border-radius: 22px;
+      box-shadow: 0 5px 0 #f8d6e3;
+    }
+
+    .label {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: var(--yellow);
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    h1 {
+      margin: 14px 0 8px;
+      font-size: clamp(26px, 6vw, 38px);
+      color: #d65e91;
+    }
+
+    header p {
+      margin: 0;
+      line-height: 1.8;
+    }
+
+    .panel {
+      margin-top: 22px;
+      padding: 22px;
+      background: var(--white);
+      border: 2px solid #d8ecfa;
+      border-radius: 20px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .hint {
+      color: #70778a;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .quick-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin: 14px 0;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .quick-button {
+      padding: 9px 13px;
+      border: 1px solid #d6e9f6;
+      border-radius: 12px;
+      background: #eff8ff;
+      color: #3f6685;
+    }
+
+    .quick-button:hover {
+      background: var(--blue);
+    }
+
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 125px;
+      padding: 14px;
+      border: 2px solid #e7dce8;
+      border-radius: 14px;
+      font: inherit;
+      font-size: 16px;
+      line-height: 1.7;
+      resize: vertical;
+      outline-color: var(--pink);
+    }
+
+    .main-button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      background: var(--pink);
+      color: #553448;
+      font-weight: bold;
+      font-size: 17px;
+      box-shadow: 0 4px 0 #e98db1;
+    }
+
+    .main-button:hover {
+      filter: brightness(0.97);
+    }
+
+    .main-button:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #e98db1;
+    }
+
+    #result {
+      display: none;
+      margin-top: 22px;
+      padding: 20px;
+      background: #fff9df;
+      border: 2px solid var(--yellow);
+      border-radius: 18px;
+      line-height: 1.9;
+    }
+
+    #result h2 {
+      color: #86651d;
+    }
+
+    #adviceText {
+      white-space: pre-wrap;
+    }
+
+    .reset-button {
+      margin-top: 12px;
+      padding: 9px 14px;
+      border: 1px solid #e5d7a5;
+      border-radius: 10px;
+      background: white;
+      color: var(--ink);
+    }
+
+    footer {
+      padding: 24px 8px;
+      text-align: center;
+      color: #777b8b;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header>
+      <span class="label">CHORUS SUPPORT</span>
+      <h1>ヒカリ<br>ソプラノ練習室</h1>
+      <p>
+        歌うときの悩みを整理して、<br>
+        自分に合った練習方法を見つけよう！
+      </p>
+    </header>
+
+    <section class="panel">
+      <h2>どんなことで困っていますか？</h2>
+      <p class="hint">
+        下の例を選ぶか、自分の悩みを自由に入力してください。
+      </p>
+
+      <div class="quick-buttons">
+        <button class="quick-button" data-text="高い音が出しにくい">
+          高い音
+        </button>
+
+        <button class="quick-button" data-text="音程が安定しない">
+          音程
+        </button>
+
+        <button class="quick-button" data-text="呼吸の仕方">
+          呼吸の仕方3選
+        </button>
+
+        <button class="quick-button" data-text="息が続かない">
+          息が続かない
+        </button>
+
+        <button class="quick-button" data-text="歌詞の発音が難しい">
+          発音
+        </button>
+
+        <button class="quick-button" data-text="声量を上げたい">
+          声量
+        </button>
+
+        <button class="quick-button" data-text="表現力をつけたい">
+          表現
+        </button>
+
+        <button class="quick-button" data-text="リズムが分からない">
+          リズム
+        </button>
+
+        <button class="quick-button" data-text="ソプラノの歌い方が分からない">
+          ソプラノ全般
+        </button>
+      </div>
+
+      <label for="question"><strong>あなたの悩み</strong></label>
+
+      <textarea
+        id="question"
+        placeholder="例：サビの高い音になると、声が出しにくいです。"
+      ></textarea>
+
+      <button class="main-button" id="adviceButton">
+        練習アドバイスを見る
+      </button>
+
+      <div id="result" aria-live="polite">
+        <h2 id="resultTitle">練習アドバイス</h2>
+        <div id="adviceText"></div>
+
+        <button class="reset-button" id="resetButton">
+          もう一度入力する
+        </button>
+      </div>
+    </section>
+
+    <footer>
+      HIKARI SOPRANO SUPPORT<br>
+      一歩ずつ、自分の声を育てよう。
+    </footer>
+  </main>
+
+  <script>
+    // 悩みのキーワードとアドバイス
+    const adviceList = [
+      {
+        keywords: ["呼吸の仕方", "呼吸法", "呼吸のやり方", "呼吸3選"],
+        title: "歌うための呼吸の仕方3選",
+        advice:
+          "① お腹まわりを意識した呼吸\n\n" +
+          "やり方：肩や首の力を抜き、息を自然に吸います。お腹や脇腹がやさしく広がる感覚を確かめましょう。無理にお腹を膨らませる必要はありません。\n\n" +
+          "② 静かに息を吸う練習\n\n" +
+          "やり方：歌い始める前に、音を立てずに自然に息を吸います。肩を持ち上げたり、慌てて吸ったりせず、次のフレーズに間に合う量を吸いましょう。\n\n" +
+          "③ 一定の息で声を出す練習\n\n" +
+          "やり方：楽に吸ったあと、「スー」と小さな音で息を吐きます。息の強さが急に変わらないように意識しましょう。慣れたら、楽に出せる高さで短いフレーズを歌ってみます。\n\n" +
+          "ポイント：息を限界まで止めたり吐き切ったりする必要はありません。めまいや息苦しさが出たら、すぐに普通の呼吸に戻して休みましょう。"
+      },
+      {
+        keywords: ["高い音", "高音", "サビ", "声が出ない", "裏声"],
+        title: "高い音の練習",
+        advice:
+          "1. まずは出しやすい高さで、軽く声を出してみましょう。\n\n" +
+          "2. 高音では、喉を無理に押し上げず、息を自然に流すことを意識します。\n\n" +
+          "3. 難しい部分だけを短く区切り、ゆっくり練習してから曲に戻りましょう。\n\n" +
+          "注意：喉が痛いときや声がかすれるときは無理をせず、休みましょう。"
+      },
+      {
+        keywords: ["音程", "音がずれる", "音を外す", "音が合わない"],
+        title: "音程を安定させる練習",
+        advice:
+          "1. ピアノなどで正しい音を確認してから歌いましょう。\n\n" +
+          "2. いきなり歌詞で歌わず、「ラ」などの一つの音で練習してみます。\n\n" +
+          "3. 自分のパートの音をよく聴き、伴奏や周りの声につられすぎないようにしましょう。\n\n" +
+          "4. 不安な音は、音楽の先生やパートの仲間に確認すると安心です。"
+      },
+      {
+        keywords: ["息", "呼吸", "ブレス", "息が続かない"],
+        title: "呼吸の練習",
+        advice:
+          "1. 歌う前に、肩に力を入れず自然に息を吸います。\n\n" +
+          "2. 歌詞のどこで息を吸うか、楽譜に印をつけてみましょう。\n\n" +
+          "3. 一息で無理に歌い切ろうとせず、決められたブレスの場所を大切にします。\n\n" +
+          "4. 息が苦しくなったら、無理をせず休憩しましょう。"
+      },
+      {
+        keywords: ["発音", "歌詞", "滑舌", "言葉"],
+        title: "発音をはっきりさせる練習",
+        advice:
+          "1. 歌詞を、まずは声を張らずに普通の速さで読んでみましょう。\n\n" +
+          "2. 母音（あ・い・う・え・お）が曖昧になっていないか確認します。\n\n" +
+          "3. 子音を意識しながら、ゆっくり歌ってみましょう。\n\n" +
+          "4. 言葉を一つずつ大切にしながら、曲の流れも忘れないようにします。"
+      },
+      {
+        keywords: ["声量", "声が小さい", "大きな声", "響き"],
+        title: "声の響きを育てる練習",
+        advice:
+          "1. 大声を出すことだけを目標にせず、楽に声が響く感覚を探しましょう。\n\n" +
+          "2. 姿勢を整え、首や肩に余計な力が入っていないか確認します。\n\n" +
+          "3. 周りの声と合わせながら、ソプラノ全体の響きを意識しましょう。\n\n" +
+          "4. 喉を押しつけて声を大きくするのは避けましょう。"
+      },
+      {
+        keywords: ["表現", "感情", "強弱", "強く", "弱く", "気持ち"],
+        title: "表現力を高める練習",
+        advice:
+          "1. 歌詞を読んで、どんな気持ちを伝えたい曲なのか考えてみましょう。\n\n" +
+          "2. 楽譜に書かれた強弱記号や音楽の先生の指示を確認します。\n\n" +
+          "3. 大切な言葉が聴く人に伝わるように、言葉の流れを意識しましょう。\n\n" +
+          "4. 自分だけで目立とうとせず、クラス全体で伝える表現を考えてみてください。"
+      },
+      {
+        keywords: ["リズム", "テンポ", "速さ", "タイミング"],
+        title: "リズムを合わせる練習",
+        advice:
+          "1. まずは歌わずに、楽譜を見ながら手拍子でリズムを確認しましょう。\n\n" +
+          "2. 難しい部分は、ゆっくりしたテンポで練習します。\n\n" +
+          "3. 伴奏をよく聴き、歌い始めるタイミングを確認しましょう。\n\n" +
+          "4. 慣れてきたら、本来のテンポに戻して歌ってみます。"
+      },
+      {
+        keywords: ["ソプラノ", "ハモリ", "ハーモニー", "音取り", "パート"],
+        title: "ソプラノの練習",
+        advice:
+          "1. 自分のパートの旋律を、楽譜や音源で確認しましょう。\n\n" +
+          "2. アルトなど他のパートにつられたときは、自分の音の動きを思い出します。\n\n" +
+          "3. 高い音だけでなく、その前後の音とのつながりも意識しましょう。\n\n" +
+          "4. 周りの仲間と声を合わせ、ソプラノ全体の音色をそろえていきましょう。"
+      }
+    ];
+
+    const question = document.getElementById("question");
+    const result = document.getElementById("result");
+    const resultTitle = document.getElementById("resultTitle");
+    const adviceText = document.getElementById("adviceText");
+
+    // 例のボタンを押すと、入力欄に悩みが入る
+    document.querySelectorAll(".quick-button").forEach(function(button) {
+      button.addEventListener("click", function() {
+        question.value = button.dataset.text;
+        question.focus();
+      });
+    });
+
+    // 入力内容に合わせてアドバイスを表示
+    document.getElementById("adviceButton").addEventListener("click", function() {
+      const text = question.value.trim();
+
+      if (text === "") {
+        resultTitle.textContent = "悩みを入力してください";
+        adviceText.textContent =
+          "例のボタンを押すか、困っていることを入力してみましょう。";
+        result.style.display = "block";
+        return;
+      }
+
+      let matchedAdvice = null;
+
+      for (const item of adviceList) {
+        if (item.keywords.some(function(keyword) {
+          return text.includes(keyword);
+        })) {
+          matchedAdvice = item;
+          break;
+        }
+      }
+
+      if (matchedAdvice) {
+        resultTitle.textContent = matchedAdvice.title;
+        adviceText.textContent = matchedAdvice.advice;
+      } else {
+        resultTitle.textContent = "練習のヒント";
+        adviceText.textContent =
+          "悩みを具体的に分けて考えてみましょう。\n\n" +
+          "・どの部分で困っていますか？\n" +
+          "・音程、呼吸、発音、リズムのどれに近いですか？\n" +
+          "・ゆっくり歌うと、うまくいきますか？\n\n" +
+          "入力に「高い音」「音程」「息」「発音」「声量」「表現」「リズム」などの言葉を入れると、関連するアドバイスが見つかりやすくなります。";
+      }
+
+      result.style.display = "block";
+      result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+
+    // 入力し直す
+    document.getElementById("resetButton").addEventListener("click", function() {
+      question.value = "";
+      result.style.display = "none";
+      question.focus();
+    });
+  </script>
+</body>
+</html>
