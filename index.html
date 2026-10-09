@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -88,21 +89,25 @@
       margin: 14px 0;
     }
 
-    button {
-      font: inherit;
-      cursor: pointer;
-    }
-
     .quick-button {
       padding: 9px 13px;
       border: 1px solid #d6e9f6;
       border-radius: 12px;
       background: #eff8ff;
       color: #3f6685;
+      font: inherit;
+      cursor: pointer;
     }
 
     .quick-button:hover {
       background: var(--blue);
+    }
+
+    .quick-button.selected {
+      background: var(--pink);
+      border-color: #e98db1;
+      color: #553448;
+      font-weight: bold;
     }
 
     textarea {
@@ -130,15 +135,11 @@
       font-weight: bold;
       font-size: 17px;
       box-shadow: 0 4px 0 #e98db1;
+      cursor: pointer;
     }
 
     .main-button:hover {
       filter: brightness(0.97);
-    }
-
-    .main-button:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 0 #e98db1;
     }
 
     #result {
@@ -151,21 +152,31 @@
       line-height: 1.9;
     }
 
-    #result h2 {
-      color: #86651d;
+    .advice-card + .advice-card {
+      border-top: 1px solid #e8dba9;
+      margin-top: 20px;
+      padding-top: 20px;
     }
 
-    #adviceText {
+    .advice-card h3 {
+      margin: 0 0 10px;
+      color: #86651d;
+      font-size: 18px;
+    }
+
+    .advice-content {
       white-space: pre-wrap;
     }
 
     .reset-button {
-      margin-top: 12px;
+      margin-top: 16px;
       padding: 9px 14px;
       border: 1px solid #e5d7a5;
       border-radius: 10px;
       background: white;
       color: var(--ink);
+      font: inherit;
+      cursor: pointer;
     }
 
     footer {
@@ -192,64 +203,58 @@
     <section class="panel">
       <h2>どんなことで困っていますか？</h2>
       <p class="hint">
-        下の例を選ぶか、自分の悩みを自由に入力してください。
+        ボタンは複数選択できます。選択した項目のアドバイスをまとめて表示します。
       </p>
 
-      <div class="quick-buttons">
-        <button class="quick-button" data-text="高い音が出しにくい">
+      <div class="quick-buttons" id="quickButtons">
+        <button type="button" class="quick-button" data-topic="high">
           高い音
         </button>
-
-        <button class="quick-button" data-text="音程が安定しない">
+        <button type="button" class="quick-button" data-topic="pitch">
           音程
         </button>
-
-        <button class="quick-button" data-text="呼吸の仕方">
+        <button type="button" class="quick-button" data-topic="breathing">
           呼吸の仕方3選
         </button>
-
-        <button class="quick-button" data-text="息が続かない">
+        <button type="button" class="quick-button" data-topic="breath">
           息が続かない
         </button>
-
-        <button class="quick-button" data-text="歌詞の発音が難しい">
+        <button type="button" class="quick-button" data-topic="pronunciation">
           発音
         </button>
-
-        <button class="quick-button" data-text="声量を上げたい">
+        <button type="button" class="quick-button" data-topic="volume">
           声量
         </button>
-
-        <button class="quick-button" data-text="表現力をつけたい">
+        <button type="button" class="quick-button" data-topic="expression">
           表現
         </button>
-
-        <button class="quick-button" data-text="リズムが分からない">
+        <button type="button" class="quick-button" data-topic="rhythm">
           リズム
         </button>
-
-        <button class="quick-button" data-text="ソプラノの歌い方が分からない">
+        <button type="button" class="quick-button" data-topic="soprano">
           ソプラノ全般
         </button>
       </div>
 
-      <label for="question"><strong>あなたの悩み</strong></label>
+      <p class="hint" id="selectionStatus" aria-live="polite">
+        選択中：0項目
+      </p>
 
+      <label for="question"><strong>その他の悩み・詳しい説明</strong></label>
       <textarea
         id="question"
-        placeholder="例：サビの高い音になると、声が出しにくいです。"
+        placeholder="例：サビの高い音が出しにくく、息も続きません。"
       ></textarea>
 
-      <button class="main-button" id="adviceButton">
-        練習アドバイスを見る
+      <button type="button" class="main-button" id="adviceButton">
+        選択したアドバイスを見る
       </button>
 
       <div id="result" aria-live="polite">
-        <h2 id="resultTitle">練習アドバイス</h2>
-        <div id="adviceText"></div>
-
-        <button class="reset-button" id="resetButton">
-          もう一度入力する
+        <h2>練習アドバイス</h2>
+        <div id="adviceList"></div>
+        <button type="button" class="reset-button" id="resetButton">
+          選択をリセットする
         </button>
       </div>
     </section>
@@ -261,150 +266,228 @@
   </main>
 
   <script>
-    // 悩みのキーワードとアドバイス
-    const adviceList = [
-      {
-        keywords: ["呼吸の仕方", "呼吸法", "呼吸のやり方", "呼吸3選"],
-        title: "歌うための呼吸の仕方3選",
-        advice:
-          "① お腹まわりを意識した呼吸\n\n" +
-          "やり方：肩や首の力を抜き、息を自然に吸います。お腹や脇腹がやさしく広がる感覚を確かめましょう。無理にお腹を膨らませる必要はありません。\n\n" +
-          "② 静かに息を吸う練習\n\n" +
-          "やり方：歌い始める前に、音を立てずに自然に息を吸います。肩を持ち上げたり、慌てて吸ったりせず、次のフレーズに間に合う量を吸いましょう。\n\n" +
-          "③ 一定の息で声を出す練習\n\n" +
-          "やり方：楽に吸ったあと、「スー」と小さな音で息を吐きます。息の強さが急に変わらないように意識しましょう。慣れたら、楽に出せる高さで短いフレーズを歌ってみます。\n\n" +
-          "ポイント：息を限界まで止めたり吐き切ったりする必要はありません。めまいや息苦しさが出たら、すぐに普通の呼吸に戻して休みましょう。"
-      },
-      {
-        keywords: ["高い音", "高音", "サビ", "声が出ない", "裏声"],
+    // 各テーマのアドバイス
+    const adviceData = {
+      high: {
         title: "高い音の練習",
+        keywords: ["高い音", "高音", "サビ", "裏声"],
         advice:
           "1. まずは出しやすい高さで、軽く声を出してみましょう。\n\n" +
-          "2. 高音では、喉を無理に押し上げず、息を自然に流すことを意識します。\n\n" +
-          "3. 難しい部分だけを短く区切り、ゆっくり練習してから曲に戻りましょう。\n\n" +
-          "注意：喉が痛いときや声がかすれるときは無理をせず、休みましょう。"
+          "2. 喉を無理に押し上げず、息を自然に流すことを意識します。\n\n" +
+          "3. 難しい部分を短く区切り、ゆっくり練習してから曲に戻りましょう。\n\n" +
+          "喉が痛いときや声がかすれるときは、無理をせず休みましょう。"
       },
-      {
-        keywords: ["音程", "音がずれる", "音を外す", "音が合わない"],
+
+      pitch: {
         title: "音程を安定させる練習",
+        keywords: ["音程", "音がずれる", "音を外す", "音が合わない"],
         advice:
           "1. ピアノなどで正しい音を確認してから歌いましょう。\n\n" +
-          "2. いきなり歌詞で歌わず、「ラ」などの一つの音で練習してみます。\n\n" +
-          "3. 自分のパートの音をよく聴き、伴奏や周りの声につられすぎないようにしましょう。\n\n" +
-          "4. 不安な音は、音楽の先生やパートの仲間に確認すると安心です。"
+          "2. まずは歌詞を付けず、「ラ」などで音を確認します。\n\n" +
+          "3. 自分のパートの旋律をよく聴き、音の動きを確かめましょう。\n\n" +
+          "不安な音は、音楽の先生やパートの仲間に確認すると安心です。"
       },
-      {
-        keywords: ["息", "呼吸", "ブレス", "息が続かない"],
-        title: "呼吸の練習",
+
+      breathing: {
+        title: "歌うための呼吸の仕方3選",
+        keywords: ["呼吸の仕方", "呼吸法", "呼吸のやり方", "呼吸3選"],
         advice:
-          "1. 歌う前に、肩に力を入れず自然に息を吸います。\n\n" +
-          "2. 歌詞のどこで息を吸うか、楽譜に印をつけてみましょう。\n\n" +
-          "3. 一息で無理に歌い切ろうとせず、決められたブレスの場所を大切にします。\n\n" +
-          "4. 息が苦しくなったら、無理をせず休憩しましょう。"
+          "① お腹まわりを意識した呼吸\n\n" +
+          "やり方：肩や首の力を抜き、自然に息を吸います。お腹や脇腹がやさしく広がる感覚を確かめましょう。無理にお腹を膨らませる必要はありません。\n\n" +
+          "② 静かに息を吸う練習\n\n" +
+          "やり方：歌い始める前に、慌てず自然に息を吸います。肩を持ち上げず、次のフレーズに必要な量を吸いましょう。\n\n" +
+          "③ 一定の息で声を出す練習\n\n" +
+          "やり方：楽に息を吸ったあと、「スー」と小さな音で息を吐きます。息の強さが急に変わらないよう意識し、慣れたら短いフレーズを歌ってみましょう。\n\n" +
+          "ポイント：息を限界まで止めたり吐き切ったりする必要はありません。めまいや息苦しさが出たら、普通の呼吸に戻して休みましょう。"
       },
-      {
-        keywords: ["発音", "歌詞", "滑舌", "言葉"],
+
+      breath: {
+        title: "息が続かないときの練習",
+        keywords: ["息が続かない", "ブレス", "息切れ"],
+        advice:
+          "1. 楽譜を見て、どこで息を吸うか確認しましょう。\n\n" +
+          "2. フレーズの前に、慌てず自然に息を吸います。\n\n" +
+          "3. 一息で無理に歌い切ろうとせず、決められたブレス位置を大切にしましょう。\n\n" +
+          "息苦しさが出たら練習を中断し、休憩しましょう。"
+      },
+
+      pronunciation: {
         title: "発音をはっきりさせる練習",
+        keywords: ["発音", "歌詞", "滑舌", "言葉"],
         advice:
-          "1. 歌詞を、まずは声を張らずに普通の速さで読んでみましょう。\n\n" +
+          "1. 歌詞を、まずは普通の速さで読んでみましょう。\n\n" +
           "2. 母音（あ・い・う・え・お）が曖昧になっていないか確認します。\n\n" +
           "3. 子音を意識しながら、ゆっくり歌ってみましょう。\n\n" +
-          "4. 言葉を一つずつ大切にしながら、曲の流れも忘れないようにします。"
+          "4. 言葉を大切にしながら、曲の流れも意識します。"
       },
-      {
-        keywords: ["声量", "声が小さい", "大きな声", "響き"],
+
+      volume: {
         title: "声の響きを育てる練習",
+        keywords: ["声量", "声が小さい", "大きな声", "響き"],
         advice:
-          "1. 大声を出すことだけを目標にせず、楽に声が響く感覚を探しましょう。\n\n" +
+          "1. 大声を出すことだけを目標にせず、楽に響く声を探しましょう。\n\n" +
           "2. 姿勢を整え、首や肩に余計な力が入っていないか確認します。\n\n" +
-          "3. 周りの声と合わせながら、ソプラノ全体の響きを意識しましょう。\n\n" +
-          "4. 喉を押しつけて声を大きくするのは避けましょう。"
+          "3. 周りの声を聴き、ソプラノ全体の響きを意識しましょう。\n\n" +
+          "喉を押しつけて声を大きくするのは避けましょう。"
       },
-      {
-        keywords: ["表現", "感情", "強弱", "強く", "弱く", "気持ち"],
+
+      expression: {
         title: "表現力を高める練習",
+        keywords: ["表現", "感情", "強弱", "強く", "弱く", "気持ち"],
         advice:
-          "1. 歌詞を読んで、どんな気持ちを伝えたい曲なのか考えてみましょう。\n\n" +
-          "2. 楽譜に書かれた強弱記号や音楽の先生の指示を確認します。\n\n" +
-          "3. 大切な言葉が聴く人に伝わるように、言葉の流れを意識しましょう。\n\n" +
-          "4. 自分だけで目立とうとせず、クラス全体で伝える表現を考えてみてください。"
+          "1. 歌詞を読んで、どんな気持ちを伝えたいか考えましょう。\n\n" +
+          "2. 楽譜の強弱記号や音楽の先生の指示を確認します。\n\n" +
+          "3. 大切な言葉が聴く人に伝わるように歌いましょう。\n\n" +
+          "4. クラス全体で伝える表現を考えてみてください。"
       },
-      {
-        keywords: ["リズム", "テンポ", "速さ", "タイミング"],
+
+      rhythm: {
         title: "リズムを合わせる練習",
+        keywords: ["リズム", "テンポ", "速さ", "タイミング"],
         advice:
-          "1. まずは歌わずに、楽譜を見ながら手拍子でリズムを確認しましょう。\n\n" +
-          "2. 難しい部分は、ゆっくりしたテンポで練習します。\n\n" +
-          "3. 伴奏をよく聴き、歌い始めるタイミングを確認しましょう。\n\n" +
-          "4. 慣れてきたら、本来のテンポに戻して歌ってみます。"
+          "1. 歌わずに、楽譜を見ながら手拍子でリズムを確認します。\n\n" +
+          "2. 難しい部分は、ゆっくりしたテンポで練習しましょう。\n\n" +
+          "3. 伴奏をよく聴き、歌い始めるタイミングを確認します。\n\n" +
+          "4. 慣れてきたら、本来のテンポに戻しましょう。"
       },
-      {
-        keywords: ["ソプラノ", "ハモリ", "ハーモニー", "音取り", "パート"],
+
+      soprano: {
         title: "ソプラノの練習",
+        keywords: ["ソプラノ", "ハモリ", "ハーモニー", "音取り", "パート"],
         advice:
           "1. 自分のパートの旋律を、楽譜や音源で確認しましょう。\n\n" +
-          "2. アルトなど他のパートにつられたときは、自分の音の動きを思い出します。\n\n" +
+          "2. 他のパートにつられたときは、自分の音の動きを思い出します。\n\n" +
           "3. 高い音だけでなく、その前後の音とのつながりも意識しましょう。\n\n" +
-          "4. 周りの仲間と声を合わせ、ソプラノ全体の音色をそろえていきましょう。"
+          "4. 周りの仲間と声を合わせ、パート全体の音色をそろえましょう。"
       }
-    ];
+    };
 
     const question = document.getElementById("question");
     const result = document.getElementById("result");
-    const resultTitle = document.getElementById("resultTitle");
-    const adviceText = document.getElementById("adviceText");
+    const adviceList = document.getElementById("adviceList");
+    const selectionStatus = document.getElementById("selectionStatus");
 
-    // 例のボタンを押すと、入力欄に悩みが入る
-    document.querySelectorAll(".quick-button").forEach(function(button) {
+    const selectedTopics = new Set();
+
+    const topicButtons = document.querySelectorAll(".quick-button");
+
+    // ボタンを押すたびに選択・解除する
+    topicButtons.forEach(function(button) {
       button.addEventListener("click", function() {
-        question.value = button.dataset.text;
-        question.focus();
+        const topic = button.dataset.topic;
+
+        if (selectedTopics.has(topic)) {
+          selectedTopics.delete(topic);
+          button.classList.remove("selected");
+          button.setAttribute("aria-pressed", "false");
+        } else {
+          selectedTopics.add(topic);
+          button.classList.add("selected");
+          button.setAttribute("aria-pressed", "true");
+        }
+
+        selectionStatus.textContent =
+          "選択中：" + selectedTopics.size + "項目";
       });
+
+      button.setAttribute("aria-pressed", "false");
     });
 
-    // 入力内容に合わせてアドバイスを表示
+    // 自由入力のキーワードに合うテーマを探す
+    function findTopicsFromText(text) {
+      const found = [];
+
+      for (const [topic, data] of Object.entries(adviceData)) {
+        if (data.keywords.some(function(keyword) {
+          return text.includes(keyword);
+        })) {
+          found.push(topic);
+        }
+      }
+
+      return found;
+    }
+
+    // 選択した項目のアドバイスをまとめて表示
     document.getElementById("adviceButton").addEventListener("click", function() {
       const text = question.value.trim();
+      const topicsToShow = new Set(selectedTopics);
 
-      if (text === "") {
-        resultTitle.textContent = "悩みを入力してください";
-        adviceText.textContent =
-          "例のボタンを押すか、困っていることを入力してみましょう。";
+      // 自由入力からも複数のテーマを探す
+      if (text !== "") {
+        findTopicsFromText(text).forEach(function(topic) {
+          topicsToShow.add(topic);
+        });
+      }
+
+      adviceList.replaceChildren();
+
+      if (topicsToShow.size === 0) {
+        const message = document.createElement("p");
+        message.textContent =
+          "まずは上のボタンから悩みを選ぶか、悩みを入力してください。";
+        adviceList.appendChild(message);
         result.style.display = "block";
         return;
       }
 
-      let matchedAdvice = null;
+      topicsToShow.forEach(function(topic) {
+        const data = adviceData[topic];
 
-      for (const item of adviceList) {
-        if (item.keywords.some(function(keyword) {
-          return text.includes(keyword);
-        })) {
-          matchedAdvice = item;
-          break;
-        }
-      }
+        const card = document.createElement("section");
+        card.className = "advice-card";
 
-      if (matchedAdvice) {
-        resultTitle.textContent = matchedAdvice.title;
-        adviceText.textContent = matchedAdvice.advice;
-      } else {
-        resultTitle.textContent = "練習のヒント";
-        adviceText.textContent =
-          "悩みを具体的に分けて考えてみましょう。\n\n" +
-          "・どの部分で困っていますか？\n" +
-          "・音程、呼吸、発音、リズムのどれに近いですか？\n" +
-          "・ゆっくり歌うと、うまくいきますか？\n\n" +
-          "入力に「高い音」「音程」「息」「発音」「声量」「表現」「リズム」などの言葉を入れると、関連するアドバイスが見つかりやすくなります。";
+        const title = document.createElement("h3");
+        title.textContent = data.title;
+
+        const content = document.createElement("div");
+        content.className = "advice-content";
+        content.textContent = data.advice;
+
+        card.appendChild(title);
+        card.appendChild(content);
+        adviceList.appendChild(card);
+      });
+
+      // 自由入力があるのに一致しなかった場合は補足を表示
+      if (text !== "" && findTopicsFromText(text).length === 0) {
+        const extra = document.createElement("section");
+        extra.className = "advice-card";
+
+        const title = document.createElement("h3");
+        title.textContent = "入力内容について";
+
+        const content = document.createElement("div");
+        content.className = "advice-content";
+        content.textContent =
+          "入力内容に直接一致するアドバイスは見つかりませんでした。\n\n" +
+          "選択した項目のアドバイスを参考にしてください。\n" +
+          "必要なら「高い音」「音程」「息」「発音」「声量」「表現」「リズム」などの言葉を使って、もう少し具体的に入力してみましょう。";
+
+        extra.appendChild(title);
+        extra.appendChild(content);
+        adviceList.appendChild(extra);
       }
 
       result.style.display = "block";
-      result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      result.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+      });
     });
 
-    // 入力し直す
+    // 選択と入力をまとめてリセット
     document.getElementById("resetButton").addEventListener("click", function() {
+      selectedTopics.clear();
+
+      topicButtons.forEach(function(button) {
+        button.classList.remove("selected");
+        button.setAttribute("aria-pressed", "false");
+      });
+
+      selectionStatus.textContent = "選択中：0項目";
       question.value = "";
+      adviceList.replaceChildren();
       result.style.display = "none";
       question.focus();
     });
